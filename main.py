@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Carregar o modelo pré-treinado
-model_path = "/Users/MacBarroso/PycharmProjects/photonicsApp/model.pkl.xz"
+model_path = "model.pkl.xz"
 model = joblib.load(model_path)
 
 # Função para realizar a previsão

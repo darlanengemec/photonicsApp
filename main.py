@@ -3,10 +3,14 @@ import joblib
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from model_training import train_regression_model
 
-# Carregar o modelo pré-treinado
-model_path = "var/model.pkl.xz"
-model = joblib.load(model_path)
+# Treinar o modelo e obter o modelo treinado
+model = train_regression_model()
+
+# # Carregar o modelo pré-treinado
+# model_path = "var/model.pkl.xz"
+# model = joblib.load(model_path)
 
 # Função para realizar a previsão
 def fazer_previsao(h, r, lambdai, lambdaf, p):

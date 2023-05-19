@@ -59,7 +59,7 @@ st.set_page_config(page_title="Predict Scattering API", layout="wide")
 
 # Título da página e logo
 st.title("Predict Scattering API")
-logo_image = "/Users/MacBarroso/PycharmProjects/photonicsApp/assets/images/logo_fotonica.jpeg"
+logo_image = "assets/images/logo_fotonica.jpeg"
 st.image(logo_image)  #, use_column_width=True)
 
 # Dividir a tela em duas colunas

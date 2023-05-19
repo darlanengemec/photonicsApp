@@ -1,4 +1,5 @@
 model.pkl.xz
 logs.log
 __pycache__/model_training.cpython-39.pyc
-
+.DS_Store
+.idea/*

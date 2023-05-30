@@ -33,6 +33,6 @@ def train_regression_model():
     final_model = finalize_model(best_model)
 
     # Salvando o modelo usando compressão LZMA
-    joblib.dump(final_model, 'model.pkl.xz', compress=('xz', 6))
+    joblib.dump(final_model, 'var/model.pkl.xz', compress=('xz', 6))
 
     return final_model

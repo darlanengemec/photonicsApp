@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 # Carregar o modelo pré-treinado
-model_path = 'var/model.pkl.xz'
+model_path = 'var/folders/model.pkl.xz'
 model = joblib.load(model_path)
 
 # Função para realizar a previsão

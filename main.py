@@ -3,14 +3,11 @@ import joblib
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from model_training import train_regression_model
+from PIL import Image
 
-# Treinar o modelo e obter o modelo treinado
-model = train_regression_model()
-
-# # Carregar o modelo pré-treinado
-# model_path = "var/model.pkl.xz"
-# model = joblib.load(model_path)
+# Carregar o modelo pré-treinado
+model_path = "var/model.pkl.xz"
+model = joblib.load(model_path)
 
 # Função para realizar a previsão
 def fazer_previsao(h, r, lambdai, lambdaf, p):
@@ -45,12 +42,12 @@ def fazer_previsao(h, r, lambdai, lambdaf, p):
     max_scattering = prediction.max()
     max_wavelength = x['lambda'][prediction.argmax()]
 
-    ax.annotate(f"Altura: {h} nm", xy=(lambdai, max_scattering), xytext=(lambdai, max_scattering), color='red')
-    ax.annotate(f"Raio: {r} nm", xy=(lambdai, max_scattering), xytext=(lambdai, max_scattering * 0.9), color='red')
-    ax.annotate(f"Comprimento de onda do pico: {max_wavelength} nm", xy=(max_wavelength, max_scattering),
-                xytext=(max_wavelength, max_scattering), color='red')
-    ax.annotate(f"Valor do pico: {max_scattering:.4f} [a.u]", xy=(max_wavelength, max_scattering),
-                xytext=(max_wavelength, max_scattering * 0.95), color='red')
+    ax.annotate(f"Height: {h} nm", xy=(lambdai, max_scattering), xytext=(lambdai, max_scattering), color='red', fontsize=7)
+    ax.annotate(f"Radius: {r} nm", xy=(lambdai, max_scattering), xytext=(lambdai, max_scattering * 0.9), color='red', fontsize=7)
+    ax.annotate(f"Wavelength peak: {max_wavelength} nm", xy=(max_wavelength, max_scattering),
+                xytext=(max_wavelength + 250, max_scattering), color='red', fontsize=7)
+    ax.annotate(f"Scattering peak: {max_scattering:.4f} [a.u]", xy=(max_wavelength, max_scattering),
+                xytext=(max_wavelength + 250, max_scattering * 0.9), color='red', fontsize=7)
 
     return fig
 
@@ -59,27 +56,126 @@ st.set_page_config(page_title="Predict Scattering API", layout="wide")
 
 # Título da página e logo
 st.title("Predict Scattering API")
-logo_image = "assets/images/logo_fotonica.jpeg"
-st.image(logo_image)  #, use_column_width=True)
+
+# Redimensionar a imagem
+logo_image = Image.open("assets/images/logo_fotonica.jpeg")
+logo_image = logo_image.resize((200, 200))  # Ajuste as dimensões conforme necessário
 
 # Dividir a tela em duas colunas
 col1, col2 = st.columns(2)
 
-# Entradas do usuário
-h = col1.number_input("Enter the height of the cylindrical gold nanostructure in nm:", value=0.0)
-r = col1.number_input("Enter the radius of the cylindrical gold nanostructure in nm:", value=0.0)
-lambdai = col1.number_input("Enter the initial applied wavelength in nm:", value=0.0)
-lambdaf = col1.number_input("Enter the final applied wavelength in nm:", value=0.0)
-p = col1.number_input("Enter the step of the applied wavelength in nm:", value=0)
+col1.image(logo_image)
 
-# Verificar se todos os campos foram preenchidos
-if h != 0.0 and r != 0.0 and lambdai != 0.0 and lambdaf != 0.0 and p != 0:
+# Entradas do usuário
+h = col1.text_input("Enter the height of the cylindrical gold nanostructure in nm:", key="h")
+if h and h.isnumeric():
+    h = float(h)
+r = col1.text_input("Enter the radius of the cylindrical gold nanostructure in nm:", key="r")
+if r and r.isnumeric():
+    r = float(r)
+lambdai = col1.text_input("Enter the initial applied wavelength in nm:", key="lambdai")
+if lambdai and lambdai.isnumeric():
+    lambdai = float(lambdai)
+lambdaf = col1.text_input("Enter the final applied wavelength in nm:", key="lambdaf")
+if lambdaf and lambdaf.isnumeric():
+    lambdaf = float(lambdaf)
+p = col1.text_input("Enter the step of the applied wavelength in nm:", key="p")
+if p and p.isnumeric():
+    p = int(p)
+
+# Botão de reset
+reset_button = col1.button("Reset")
+
+if reset_button:
+    # Redefinir todas as entradas
+    h = None
+    r = None
+    lambdai = None
+    lambdaf = None
+    p = None
+
+# Verificar se todas as caixas de entrada estão preenchidas e são números válidos
+if h is not None and r is not None and lambdai is not None and lambdai != '' and lambdaf is not None and lambdaf != '' and p is not None and p != '':
+    # Converta lambdai, lambdaf e p para os tipos corretos
+    lambdai = float(lambdai)
+    lambdaf = float(lambdaf)
+    p = int(p)
+
     # Fazer a previsão
     fig = fazer_previsao(h, r, lambdai, lambdaf, p)
-
     # Exibir o valor do pico de scattering
     valor_pico = fig.gca().get_lines()[0].get_ydata().max()
+
+    # Subir o gráfico e a mensagem
+    col2.empty()
+
+    # Ajustar a altura do gráfico para 300 pixels
+    fig.set_size_inches(5, 4)  # Ajuste as dimensões conforme necessário
+
+    # Exibir o gráfico
     col2.pyplot(fig)
 
-    # Exibir o valor do pico de scattering
-    col2.write(f"The scattering peak value for this nanostructure is: {valor_pico:.4f} [a.u]")
+    # Centralizar a mensagem abaixo do gráfico
+    col2.text("")  # Adicionar espaço em branco
+    col2.markdown(
+        f'<p style="text-align: center;">The scattering peak value for this nanostructure is:</p>',
+        unsafe_allow_html=True
+    )
+    col2.markdown(
+        f'<p style="text-align: center;">{valor_pico:.4f} [a.u]</p>',
+        unsafe_allow_html=True
+    )
+
+
+# # Entradas do usuário
+# h = col1.text_input("Enter the height of the cylindrical gold nanostructure in nm:", key="h")
+# if h and h.isnumeric():
+#     h = float(h)
+#     r = col1.text_input("Enter the radius of the cylindrical gold nanostructure in nm:", key="r")
+#     if r and r.isnumeric():
+#         r = float(r)
+#         lambdai = col1.text_input("Enter the initial applied wavelength in nm:", key="lambdai")
+#         if lambdai and lambdai.isnumeric():
+#             lambdai = float(lambdai)
+#             lambdaf = col1.text_input("Enter the final applied wavelength in nm:", key="lambdaf")
+#             if lambdaf and lambdaf.isnumeric():
+#                 lambdaf = float(lambdaf)
+#                 p = col1.text_input("Enter the step of the applied wavelength in nm:", key="p")
+#                 if p and p.isnumeric():
+#                     p = int(p)
+#                     # Verificar se todas as caixas de entrada estão vazias
+#                     if h is not None and r is not None and lambdai is not None and lambdaf is not None and p is not None:
+#                         # Fazer a previsão
+#                         fig = fazer_previsao(h, r, lambdai, lambdaf, p)
+#
+#                         # Exibir o valor do pico de scattering
+#                         valor_pico = fig.gca().get_lines()[0].get_ydata().max()
+#
+#                         # Subir o gráfico e a mensagem
+#                         col2.empty()
+#
+#                         # Ajustar a altura do gráfico para 300 pixels
+#                         fig.set_size_inches(5, 4)  # Ajuste as dimensões conforme necessário
+#
+#                         # Exibir o gráfico
+#                         col2.pyplot(fig)
+#
+#                         # Centralizar a mensagem abaixo do gráfico
+#                         col2.text("")  # Adicionar espaço em branco
+#                         col2.markdown(
+#                             f'<p style="text-align: center;">The scattering peak value for this nanostructure is:</p>',
+#                             unsafe_allow_html=True
+#                         )
+#                         col2.markdown(
+#                             f'<p style="text-align: center;">{valor_pico:.4f} [a.u]</p>',
+#                             unsafe_allow_html=True
+#                         )
+# #
+#
+#
+#
+#
+#
+#
+#
+#
